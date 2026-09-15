@@ -1,4 +1,4 @@
-```php
+
 <?php
 
 require_once "config/db.php";
@@ -536,4 +536,4 @@ $stmt->close();
 $conn->close();
 
 ?>
-```
+
