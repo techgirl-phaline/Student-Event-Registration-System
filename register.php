@@ -1,9 +1,11 @@
 
 <?php
+require_once "config/db.php";
+
 
 $selected_event = $_GET['event'] ?? '';
 
-$events = [
+$defaultEvents = [
     "New Students Orientation",
     "Academic & Study Skills Seminar",
     "Clinical Skills Competition",
@@ -18,9 +20,56 @@ $events = [
     "Student Awards & Closing Ceremony"
 ];
 
-if ($selected_event !== '' && !in_array($selected_event, $events)) {
-    $selected_event = '';
+$events = [];
+
+foreach ($defaultEvents as $eventName) {
+    $events[] = [
+        "session_title" => $eventName
+    ];
 }
+
+$sql = "SELECT session_title, session_date, status
+        FROM sessions
+        WHERE session_date >= CURDATE()
+        AND status IN ('Upcoming', 'Active')
+        ORDER BY session_date ASC";
+
+$result = $conn->query($sql);
+
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+
+        $exists = false;
+
+        foreach ($events as $event) {
+            if ($event["session_title"] === $row["session_title"]) {
+                $exists = true;
+                break;
+            }
+        }
+
+        if (!$exists) {
+            $events[] = $row;
+        }
+    }
+}
+
+if ($selected_event !== '') {
+
+    $valid_event = false;
+
+    foreach ($events as $event) {
+        if ($selected_event === $event["session_title"]) {
+            $valid_event = true;
+            break;
+        }
+    }
+
+    if (!$valid_event) {
+        $selected_event = '';
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -364,14 +413,14 @@ if ($selected_event !== '' && !in_array($selected_event, $events)) {
                             <?php foreach ($events as $event): ?>
 
                                 <option
-                                    value="<?php echo htmlspecialchars($event); ?>"
+                                    value="<?php echo htmlspecialchars($event['session_title']); ?>"
                                     <?php
-                                    if ($selected_event === $event) {
+                                    if ($selected_event === $event['session_title']) {
                                         echo "selected";
                                     }
                                     ?>
                                 >
-                                    <?php echo htmlspecialchars($event); ?>
+                                    <?php echo htmlspecialchars($event['session_title']); ?>
                                 </option>
 
                             <?php endforeach; ?>
@@ -657,4 +706,9 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 
 </html>
+
+
+
+
+
 
