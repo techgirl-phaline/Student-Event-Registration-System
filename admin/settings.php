@@ -14,8 +14,11 @@ $messageType = "";
 
 $adminId = $_SESSION["admin_id"] ?? 0;
 
+
+/* GET CURRENT ADMIN SETTINGS */
+
 $adminQuery = $conn->prepare(
-    "SELECT username
+    "SELECT username, registration_status
      FROM admins
      WHERE admin_id = ?"
 );
@@ -29,6 +32,10 @@ $admin = $adminResult->fetch_assoc();
 $adminQuery->close();
 
 $currentUsername = $admin["username"] ?? "";
+$currentRegistrationStatus = $admin["registration_status"] ?? "Open";
+
+
+/* UPDATE SETTINGS */
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
@@ -36,6 +43,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $currentPassword = $_POST["current_password"] ?? "";
     $newPassword = $_POST["new_password"] ?? "";
     $confirmPassword = $_POST["confirm_password"] ?? "";
+    $registrationStatus = $_POST["registration_status"] ?? "Open";
+
+
+    /* CHECK REGISTRATION STATUS */
+
+    if (!in_array($registrationStatus, ["Open", "Closed"], true)) {
+        $registrationStatus = "Open";
+    }
+
+
+    /* VALIDATE USERNAME */
 
     if ($username === "") {
 
@@ -48,6 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $messageType = "danger";
 
     } else {
+
+        /* VERIFY CURRENT PASSWORD */
 
         $passwordQuery = $conn->prepare(
             "SELECT password
@@ -63,22 +83,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $passwordQuery->close();
 
-        if (!$adminData || !password_verify($currentPassword, $adminData["password"])) {
+
+        if (
+            !$adminData ||
+            !password_verify(
+                $currentPassword,
+                $adminData["password"]
+            )
+        ) {
 
             $message = "Current password is incorrect.";
             $messageType = "danger";
 
-        } elseif ($newPassword !== "" && strlen($newPassword) < 8) {
+        } elseif (
+            $newPassword !== "" &&
+            strlen($newPassword) < 8
+        ) {
 
             $message = "New password must contain at least 8 characters.";
             $messageType = "danger";
 
-        } elseif ($newPassword !== "" && $newPassword !== $confirmPassword) {
+        } elseif (
+            $newPassword !== "" &&
+            $newPassword !== $confirmPassword
+        ) {
 
             $message = "New password and confirmation password do not match.";
             $messageType = "danger";
 
         } else {
+
+            /* CHECK USERNAME AVAILABILITY */
 
             $checkUsername = $conn->prepare(
                 "SELECT admin_id
@@ -99,12 +134,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $checkUsername->close();
 
+
             if ($usernameResult->num_rows > 0) {
 
                 $message = "That username is already being used.";
                 $messageType = "danger";
 
             } else {
+
+                /* UPDATE WITH NEW PASSWORD */
 
                 if ($newPassword !== "") {
 
@@ -115,37 +153,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     $updateQuery = $conn->prepare(
                         "UPDATE admins
-                         SET username = ?, password = ?
+                         SET username = ?,
+                             password = ?,
+                             registration_status = ?
+                         WHERE admin_id = ?"
+                    );
+
+                    $updateQuery->bind_param(
+                        "sssi",
+                        $username,
+                        $hashedPassword,
+                        $registrationStatus,
+                        $adminId
+                    );
+
+
+                /* UPDATE WITHOUT CHANGING PASSWORD */
+
+                } else {
+
+                    $updateQuery = $conn->prepare(
+                        "UPDATE admins
+                         SET username = ?,
+                             registration_status = ?
                          WHERE admin_id = ?"
                     );
 
                     $updateQuery->bind_param(
                         "ssi",
                         $username,
-                        $hashedPassword,
-                        $adminId
-                    );
-
-                } else {
-
-                    $updateQuery = $conn->prepare(
-                        "UPDATE admins
-                         SET username = ?
-                         WHERE admin_id = ?"
-                    );
-
-                    $updateQuery->bind_param(
-                        "si",
-                        $username,
+                        $registrationStatus,
                         $adminId
                     );
                 }
+
+
+                /* SAVE SETTINGS */
 
                 if ($updateQuery->execute()) {
 
                     $_SESSION["admin_username"] = $username;
 
                     $currentUsername = $username;
+                    $currentRegistrationStatus = $registrationStatus;
 
                     $message = "Settings updated successfully.";
                     $messageType = "success";
@@ -171,7 +221,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <head>
 
-```
 <meta charset="UTF-8">
 
 <meta
@@ -359,13 +408,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         font-weight: 600;
     }
 
-    .form-control {
+    .form-control,
+    .form-select {
         border-radius: 10px;
         padding: 12px 14px;
         border: 1px solid #d9e1ea;
     }
 
-    .form-control:focus {
+    .form-control:focus,
+    .form-select:focus {
         border-color: #1c79c9;
         box-shadow: 0 0 0 0.2rem rgba(28, 121, 201, 0.15);
     }
@@ -392,6 +443,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     .info-icon {
         font-size: 35px;
         margin-bottom: 10px;
+    }
+
+    .registration-card {
+        border: none;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    }
+
+    .status-box {
+        border-radius: 12px;
+        padding: 15px;
+        background: #f4f7fb;
     }
 
     .mobile-menu-btn {
@@ -470,7 +534,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
 </style>
-```
 
 </head>
 
@@ -482,460 +545,518 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     onclick="closeSidebar()"
 ></div>
 
+
 <!-- SIDEBAR -->
 
 <aside class="sidebar" id="sidebar">
 
-```
-<a
-    href="dashboard.php"
-    class="sidebar-brand"
->
+    <a
+        href="dashboard.php"
+        class="sidebar-brand"
+    >
 
-    MMTC ADMIN
+        MMTC ADMIN
 
-    <span>
-        Event Registration System
-    </span>
+        <span>
+            Event Registration System
+        </span>
 
-</a>
-
-
-<div class="sidebar-section-title">
-    Main Menu
-</div>
+    </a>
 
 
-<ul class="sidebar-menu">
-
-    <li>
-
-        <a href="dashboard.php">
-
-            <span class="sidebar-icon">
-                🏠
-            </span>
-
-            Dashboard
-
-        </a>
-
-    </li>
+    <div class="sidebar-section-title">
+        Main Menu
+    </div>
 
 
-    <li>
+    <ul class="sidebar-menu">
 
-        <a href="sessions.php">
+        <li>
 
-            <span class="sidebar-icon">
-                📅
-            </span>
+            <a href="dashboard.php">
 
-            Manage Sessions
+                <span class="sidebar-icon">
+                    🏠
+                </span>
 
-        </a>
+                Dashboard
 
-    </li>
+            </a>
 
-
-    <li>
-
-        <a href="records.php">
-
-            <span class="sidebar-icon">
-                📋
-            </span>
-
-            Registration Records
-
-        </a>
-
-    </li>
+        </li>
 
 
-    <li>
+        <li>
 
-        <a href="alerts.php">
+            <a href="sessions.php">
 
-            <span class="sidebar-icon">
-                🔔
-            </span>
+                <span class="sidebar-icon">
+                    📅
+                </span>
 
-            Alerts
+                Manage Sessions
 
-        </a>
+            </a>
 
-    </li>
-
-</ul>
+        </li>
 
 
-<hr class="sidebar-divider">
+        <li>
+
+            <a href="records.php">
+
+                <span class="sidebar-icon">
+                    📋
+                </span>
+
+                Registration Records
+
+            </a>
+
+        </li>
 
 
-<div class="sidebar-section-title">
-    System
-</div>
+        <li>
+
+            <a href="alerts.php">
+
+                <span class="sidebar-icon">
+                    🔔
+                </span>
+
+                Alerts
+
+            </a>
+
+        </li>
+
+    </ul>
 
 
-<ul class="sidebar-menu">
-
-    <li>
-
-        <a
-            href="settings.php"
-            class="active"
-        >
-
-            <span class="sidebar-icon">
-                ⚙️
-            </span>
-
-            Settings
-
-        </a>
-
-    </li>
+    <hr class="sidebar-divider">
 
 
-    <li>
+    <div class="sidebar-section-title">
+        System
+    </div>
 
-        <a
-            href="logout.php"
-            class="logout-link"
-        >
 
-            <span class="sidebar-icon">
-                🚪
-            </span>
+    <ul class="sidebar-menu">
 
-            Logout
+        <li>
 
-        </a>
+            <a
+                href="settings.php"
+                class="active"
+            >
 
-    </li>
+                <span class="sidebar-icon">
+                    ⚙️
+                </span>
 
-</ul>
-```
+                Settings
+
+            </a>
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="logout.php"
+                class="logout-link"
+            >
+
+                <span class="sidebar-icon">
+                    🚪
+                </span>
+
+                Logout
+
+            </a>
+
+        </li>
+
+    </ul>
 
 </aside>
+
 
 <!-- MAIN CONTENT -->
 
 <div class="main-content">
 
-```
-<!-- TOP BAR -->
 
-<header class="topbar">
+    <!-- TOP BAR -->
 
-    <div class="d-flex align-items-center gap-3">
+    <header class="topbar">
 
-        <button
-            class="mobile-menu-btn"
-            onclick="openSidebar()"
-        >
-            ☰
-        </button>
+        <div class="d-flex align-items-center gap-3">
 
-        <h1 class="page-title">
-            Settings
-        </h1>
-
-    </div>
-
-
-    <div class="admin-user">
-
-        <div class="admin-avatar">
-            👤
-        </div>
-
-        <span>
-
-            <?php
-
-            echo htmlspecialchars(
-                $_SESSION["admin_username"] ?? "Administrator"
-            );
-
-            ?>
-
-        </span>
-
-    </div>
-
-</header>
-
-
-<!-- SETTINGS -->
-
-<section class="dashboard-section">
-
-    <div class="container-fluid">
-
-
-        <div class="mb-4">
-
-            <h2 class="welcome-title">
-                Administrator Settings
-            </h2>
-
-            <p class="welcome-text">
-                Manage your administrator account and security settings.
-            </p>
-
-        </div>
-
-
-        <?php if ($message !== ""): ?>
-
-            <div
-                class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show"
-                role="alert"
+            <button
+                class="mobile-menu-btn"
+                onclick="openSidebar()"
             >
+                ☰
+            </button>
 
-                <?php echo htmlspecialchars($message); ?>
+            <h1 class="page-title">
+                Settings
+            </h1>
 
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                ></button>
+        </div>
+
+
+        <div class="admin-user">
+
+            <div class="admin-avatar">
+                👤
+            </div>
+
+            <span>
+
+                <?php
+
+                echo htmlspecialchars(
+                    $_SESSION["admin_username"] ?? "Administrator"
+                );
+
+                ?>
+
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- SETTINGS -->
+
+    <section class="dashboard-section">
+
+        <div class="container-fluid">
+
+
+            <div class="mb-4">
+
+                <h2 class="welcome-title">
+                    Administrator Settings
+                </h2>
+
+                <p class="welcome-text">
+                    Manage your administrator account, registration access and security settings.
+                </p>
 
             </div>
 
-        <?php endif; ?>
 
+            <?php if ($message !== ""): ?>
 
-        <div class="row g-4">
+                <div
+                    class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show"
+                    role="alert"
+                >
 
+                    <?php echo htmlspecialchars($message); ?>
 
-            <!-- ACCOUNT SETTINGS -->
-
-            <div class="col-lg-8">
-
-                <div class="card settings-card">
-
-                    <div class="card-body p-4">
-
-                        <h4 class="mb-1">
-                            Account & Security
-                        </h4>
-
-                        <p class="text-muted mb-4">
-                            Update your administrator username or password.
-                        </p>
-
-
-                        <form
-                            method="POST"
-                            action=""
-                        >
-
-
-                            <div class="mb-3">
-
-                                <label
-                                    for="username"
-                                    class="form-label"
-                                >
-                                    Admin Username
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="username"
-                                    name="username"
-                                    value="<?php echo htmlspecialchars($currentUsername); ?>"
-                                    maxlength="50"
-                                    required
-                                >
-
-                            </div>
-
-
-                            <hr class="my-4">
-
-
-                            <h5 class="mb-3">
-                                Change Password
-                            </h5>
-
-
-                            <div class="mb-3">
-
-                                <label
-                                    for="current_password"
-                                    class="form-label"
-                                >
-                                    Current Password
-                                </label>
-
-                                <input
-                                    type="password"
-                                    class="form-control"
-                                    id="current_password"
-                                    name="current_password"
-                                    placeholder="Enter current password"
-                                    required
-                                >
-
-                            </div>
-
-
-                            <div class="mb-3">
-
-                                <label
-                                    for="new_password"
-                                    class="form-label"
-                                >
-                                    New Password
-                                </label>
-
-                                <input
-                                    type="password"
-                                    class="form-control"
-                                    id="new_password"
-                                    name="new_password"
-                                    placeholder="Leave blank to keep current password"
-                                    minlength="8"
-                                >
-
-                                <small class="text-muted">
-                                    Password must contain at least 8 characters.
-                                </small>
-
-                            </div>
-
-
-                            <div class="mb-4">
-
-                                <label
-                                    for="confirm_password"
-                                    class="form-label"
-                                >
-                                    Confirm New Password
-                                </label>
-
-                                <input
-                                    type="password"
-                                    class="form-control"
-                                    id="confirm_password"
-                                    name="confirm_password"
-                                    placeholder="Repeat new password"
-                                    minlength="8"
-                                >
-
-                            </div>
-
-
-                            <button
-                                type="submit"
-                                class="btn btn-primary update-btn"
-                            >
-                                Save Changes
-                            </button>
-
-
-                        </form>
-
-                    </div>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
 
                 </div>
 
-            </div>
+            <?php endif; ?>
 
 
-            <!-- SYSTEM INFORMATION -->
+            <div class="row g-4">
 
-            <div class="col-lg-4">
 
-                <div class="card info-card">
+                <!-- ACCOUNT SETTINGS -->
 
-                    <div class="card-body p-4">
+                <div class="col-lg-8">
 
-                        <div class="info-icon">
-                            🏫
+                    <div class="card settings-card">
+
+                        <div class="card-body p-4">
+
+                            <h4 class="mb-1">
+                                Account & Security
+                            </h4>
+
+                            <p class="text-muted mb-4">
+                                Update your administrator username or password.
+                            </p>
+
+
+                            <form
+                                method="POST"
+                                action=""
+                            >
+
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="username"
+                                        class="form-label"
+                                    >
+                                        Admin Username
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="username"
+                                        name="username"
+                                        value="<?php echo htmlspecialchars($currentUsername); ?>"
+                                        maxlength="50"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <hr class="my-4">
+
+
+                                <h5 class="mb-3">
+                                    Change Password
+                                </h5>
+
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="current_password"
+                                        class="form-label"
+                                    >
+                                        Current Password
+                                    </label>
+
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        id="current_password"
+                                        name="current_password"
+                                        placeholder="Enter current password"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="new_password"
+                                        class="form-label"
+                                    >
+                                        New Password
+                                    </label>
+
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        id="new_password"
+                                        name="new_password"
+                                        placeholder="Leave blank to keep current password"
+                                        minlength="8"
+                                    >
+
+                                    <small class="text-muted">
+                                        Password must contain at least 8 characters.
+                                    </small>
+
+                                </div>
+
+
+                                <div class="mb-4">
+
+                                    <label
+                                        for="confirm_password"
+                                        class="form-label"
+                                    >
+                                        Confirm New Password
+                                    </label>
+
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        id="confirm_password"
+                                        name="confirm_password"
+                                        placeholder="Repeat new password"
+                                        minlength="8"
+                                    >
+
+                                </div>
+
+
+                                <hr class="my-4">
+
+
+                                <!-- REGISTRATION SETTINGS -->
+
+                                <h5 class="mb-2">
+                                    Registration Settings
+                                </h5>
+
+                                <p class="text-muted mb-3">
+                                    Control whether students are allowed to submit new event registrations.
+                                </p>
+
+
+                                <div class="status-box mb-4">
+
+                                    <label
+                                        for="registration_status"
+                                        class="form-label"
+                                    >
+                                        Registration Status
+                                    </label>
+
+                                    <select
+                                        class="form-select"
+                                        id="registration_status"
+                                        name="registration_status"
+                                    >
+
+                                        <option
+                                            value="Open"
+                                            <?php echo $currentRegistrationStatus === "Open" ? "selected" : ""; ?>
+                                        >
+                                            Open - Students can register
+                                        </option>
+
+                                        <option
+                                            value="Closed"
+                                            <?php echo $currentRegistrationStatus === "Closed" ? "selected" : ""; ?>
+                                        >
+                                            Closed - Registration unavailable
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary update-btn"
+                                >
+                                    Save Changes
+                                </button>
+
+
+                            </form>
+
                         </div>
 
-                        <h5 class="fw-bold">
-                            MMTC Event System
-                        </h5>
-
-                        <p class="mb-2">
-                            Macmillan Medical Training College
-                        </p>
-
-                        <p class="mb-2">
-                            Student Event Registration System
-                        </p>
-
-                        <hr>
-
-                        <p class="mb-0">
-
-                            <strong>System Status:</strong>
-
-                            <span class="text-success">
-                                Active
-                            </span>
-
-                        </p>
-
                     </div>
 
                 </div>
 
 
-                <div class="card settings-card mt-4">
+                <!-- RIGHT SIDE -->
 
-                    <div class="card-body p-4">
+                <div class="col-lg-4">
 
-                        <h5 class="fw-bold" style="color:#123b68;">
-                            Security Tip
-                        </h5>
 
-                        <p class="text-muted mb-0">
-                            Keep your administrator password private
-                            and use a strong password that is difficult
-                            for others to guess.
-                        </p>
+                    <!-- SYSTEM INFORMATION -->
+
+                    <div class="card info-card">
+
+                        <div class="card-body p-4">
+
+                            <div class="info-icon">
+                                🏫
+                            </div>
+
+                            <h5 class="fw-bold">
+                                MMTC Event System
+                            </h5>
+
+                            <p class="mb-2">
+                                Macmillan Medical Training College
+                            </p>
+
+                            <p class="mb-2">
+                                Student Event Registration System
+                            </p>
+
+                            <hr>
+
+                            <p class="mb-0">
+
+                                <strong>System Status:</strong>
+
+                                <span class="text-success">
+                                    Active
+                                </span>
+
+                            </p>
+
+                        </div>
 
                     </div>
 
+
+                    <!-- SECURITY TIP -->
+
+                    <div class="card settings-card mt-4">
+
+                        <div class="card-body p-4">
+
+                            <h5
+                                class="fw-bold"
+                                style="color:#123b68;"
+                            >
+                                Security Tip
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Keep your administrator password private
+                                and use a strong password that is difficult
+                                for others to guess.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
                 </div>
+
 
             </div>
 
 
         </div>
 
-
-    </div>
-
-</section>
+    </section>
 
 
-<!-- FOOTER -->
+    <!-- FOOTER -->
 
-<footer class="footer">
+    <footer class="footer">
 
-    <p class="mb-0">
+        <p class="mb-0">
 
-        &copy; <?php echo date("Y"); ?>
+            &copy; <?php echo date("Y"); ?>
 
-        Macmillan Medical Training College -
+            Macmillan Medical Training College -
 
-        Student Event Registration System
+            Student Event Registration System
 
-    </p>
+        </p>
 
-</footer>
-```
+    </footer>
+
 
 </div>
+
 
 <script>
 
@@ -968,8 +1089,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     }
 
-
 </script>
+
 
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">

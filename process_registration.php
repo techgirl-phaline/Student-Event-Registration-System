@@ -2,6 +2,117 @@
 <?php
 
 require_once "config/db.php";
+/* Check whether student registration is open */
+
+$registrationSettings = $conn->query(
+    "SELECT registration_status
+     FROM admins
+     LIMIT 1"
+);
+
+if ($registrationSettings && $registrationSettings->num_rows === 1) {
+
+    $registrationData = $registrationSettings->fetch_assoc();
+
+    if ($registrationData["registration_status"] === "Closed") {
+        ?>
+
+        <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0"
+            >
+
+            <title>Registration Closed | MMTC</title>
+
+            <link
+                href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+                rel="stylesheet"
+            >
+
+            <style>
+
+                body {
+                    background: #f5f7fb;
+                    font-family: Arial, sans-serif;
+                }
+
+                .message-card {
+                    max-width: 600px;
+                    margin: 80px auto;
+                    border: none;
+                    border-radius: 18px;
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+                }
+
+                .closed-icon {
+                    font-size: 55px;
+                }
+
+                .page-title {
+                    font-weight: 700;
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+        <div class="container">
+
+            <div class="card message-card">
+
+                <div class="card-body p-5 text-center">
+
+                    <div class="closed-icon mb-3">
+                        🔒
+                    </div>
+
+                    <h2 class="page-title text-danger mb-3">
+                        Registration Currently Closed
+                    </h2>
+
+                    <p class="text-muted mb-4">
+                        Student event registration is currently unavailable.
+                        Please check again later or contact the administration
+                        for more information.
+                    </p>
+
+                    <a
+                        href="events.php"
+                        class="btn btn-primary"
+                    >
+                        View Events
+                    </a>
+
+                    <a
+                        href="index.php"
+                        class="btn btn-outline-secondary ms-2"
+                    >
+                        Back to Home
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        </body>
+
+        </html>
+
+        <?php
+        exit();
+    }
+}
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: register.php");
