@@ -14,7 +14,7 @@ Instead of relying on manual registration, students can browse available events,
 
 The system stores registration information in a MySQL database and provides an administration section where authorised users can view, search and manage submitted registration records.
 
----
+
 
 ## Project Objectives
 
