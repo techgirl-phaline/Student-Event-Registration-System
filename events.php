@@ -90,7 +90,7 @@ $pastEvents = [
 
     [
         "title" => "Mental Health & Wellness Day",
-        "image" => "images/events/health images.jpeg"
+        "image" => "images/health download (1).jpeg"
     ],
 
     [
@@ -777,10 +777,11 @@ $pastEvents = [
 
                 } elseif (
                     strpos($title, "wellness") !== false ||
+                    strpos($title, "health awareness") !== false ||
                     strpos($title, "mental health") !== false
                 ) {
 
-                    $eventImage = "images/events/health images.jpeg";
+                    $eventImage = "images/health download (1).jpeg";
 
                 } elseif (
                     strpos($title, "cultural") !== false ||
@@ -1271,5 +1272,9 @@ $pastEvents = [
 $conn->close();
 
 ?>
+
+
+
+
 
 
