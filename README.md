@@ -4,7 +4,7 @@
 
 A web-based **Student Event Registration Management System** developed for Macmillan Medical Training College (MMTC). The system allows students to view available college events and register online, while authorised users can view and manage submitted registration records.
 
----
+
 
 ## Project Overview
 
@@ -29,7 +29,7 @@ The main objectives of the system are to:
 * Display the number of registered students.
 * Provide a responsive and user-friendly interface.
 
----
+
 
 ## Main Features
 
@@ -67,7 +67,7 @@ The system was developed using:
 * **XAMPP** – Local development environment
 * **Git & GitHub** – Version control
 
----
+
 
 ## System Requirements
 
