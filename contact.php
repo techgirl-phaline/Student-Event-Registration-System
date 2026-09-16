@@ -1,8 +1,10 @@
-
+```php
 <?php
+
 require_once "config/db.php";
 
 $message = "";
+$message_type = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
@@ -20,16 +22,45 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ) {
 
         $message = "Please fill in all required fields.";
+        $message_type = "danger";
 
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
         $message = "Please enter a valid email address.";
+        $message_type = "danger";
 
     } else {
 
-        $message = "Thank you, $name. Your message has been received.";
+        $stmt = $conn->prepare(
+            "INSERT INTO contact_messages
+            (full_name, email, phone, subject, message)
+            VALUES (?, ?, ?, ?, ?)"
+        );
+
+        $stmt->bind_param(
+            "sssss",
+            $name,
+            $email,
+            $phone,
+            $subject,
+            $message_text
+        );
+
+        if ($stmt->execute()) {
+
+            $message = "Thank you, $name. Your message has been received successfully.";
+            $message_type = "success";
+
+        } else {
+
+            $message = "Sorry, your message could not be sent. Please try again.";
+            $message_type = "danger";
+        }
+
+        $stmt->close();
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -69,12 +100,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             background: #123b68;
             padding: 15px 0;
         }
+
         .navbar-logo {
-    height: 58px;
-    width: auto;
-    object-fit: contain;
-    display: block;
-}
+            height: 58px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
 
         .navbar-brand {
             color: white !important;
@@ -88,25 +120,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             font-weight: 400;
             color: #c8d9ea;
         }
-        .brand-name {
-    display: flex !important;
-    flex-direction: column;
-    line-height: 1.2;
-}
 
-.brand-name strong {
-    display: block;
-    color: white !important;
-    font-size: 22px;
-    font-weight: 800;
-}
-.brand-name span {
-    display: block;
-    color: #c8d9ea !important;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 3px;
-}
+        .brand-name {
+            display: flex !important;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .brand-name strong {
+            display: block;
+            color: white !important;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .brand-name span {
+            display: block;
+            color: #c8d9ea !important;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
 
         .navbar-nav .nav-link {
             color: #eaf2f8 !important;
@@ -335,17 +369,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             class="navbar-brand"
             href="index.php"
         >
-        <img src="images/logo Image .png"
-         alt="MMTC Logo"
-         class="navbar-logo">
-         <div class="brand-name">
-            <strong>MMTC</strong>
-            <span>
-                Student Event Registration System
-            </span>
+
+            <img
+                src="images/logo Image .png"
+                alt="MMTC Logo"
+                class="navbar-logo"
+            >
+
+            <div class="brand-name">
+
+                <strong>MMTC</strong>
+
+                <span>
+                    Student Event Registration System
+                </span>
+
+            </div>
 
         </a>
-</div>
+
         <button
             class="navbar-toggler bg-light"
             type="button"
@@ -365,39 +407,47 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <ul class="navbar-nav ms-auto">
 
                 <li class="nav-item">
+
                     <a
                         class="nav-link"
                         href="index.php"
                     >
                         Home
                     </a>
+
                 </li>
 
                 <li class="nav-item">
+
                     <a
                         class="nav-link"
                         href="events.php"
                     >
                         Events
                     </a>
+
                 </li>
 
                 <li class="nav-item">
+
                     <a
                         class="nav-link"
                         href="about.php"
                     >
                         About
                     </a>
+
                 </li>
 
                 <li class="nav-item">
+
                     <a
                         class="nav-link active"
                         href="contact.php"
                     >
                         Contact
                     </a>
+
                 </li>
 
                 <li class="nav-item ms-lg-2">
@@ -419,6 +469,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </nav>
 
+
 <section class="hero">
 
     <div class="container">
@@ -436,11 +487,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </section>
 
+
 <section class="section">
 
     <div class="container">
 
         <div class="row g-5">
+
 
             <div class="col-lg-5">
 
@@ -449,6 +502,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <h2>
                         Get In Touch
                     </h2>
+
 
                     <div class="contact-item">
 
@@ -471,6 +525,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     </div>
 
+
                     <div class="contact-item">
 
                         <div class="contact-icon">
@@ -491,6 +546,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     </div>
 
+
                     <div class="contact-item">
 
                         <div class="contact-icon">
@@ -510,6 +566,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </div>
 
                     </div>
+
 
                     <div class="contact-item">
 
@@ -536,6 +593,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             </div>
 
+
             <div class="col-lg-7">
 
                 <div class="contact-card">
@@ -544,15 +602,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         Send Us a Message
                     </h2>
 
+
                     <?php if ($message !== ""): ?>
 
-                        <div class="alert alert-info">
+                        <div class="alert alert-<?php echo $message_type; ?>">
 
                             <?php echo htmlspecialchars($message); ?>
 
                         </div>
 
                     <?php endif; ?>
+
 
                     <form
                         method="POST"
@@ -561,6 +621,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     >
 
                         <div class="row g-3">
+
 
                             <div class="col-md-6">
 
@@ -582,6 +643,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                             </div>
 
+
                             <div class="col-md-6">
 
                                 <label
@@ -602,6 +664,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                             </div>
 
+
                             <div class="col-md-6">
 
                                 <label
@@ -620,6 +683,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 >
 
                             </div>
+
 
                             <div class="col-md-6">
 
@@ -641,6 +705,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                             </div>
 
+
                             <div class="col-12">
 
                                 <label
@@ -659,6 +724,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 ></textarea>
 
                             </div>
+
 
                             <div class="col-12">
 
@@ -681,6 +747,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         </div>
 
+
         <div class="map-box">
 
             <div>
@@ -700,6 +767,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 
 </section>
+
 
 <section class="cta">
 
@@ -724,6 +792,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </section>
 
+
 <footer class="footer">
 
     <p>
@@ -738,9 +807,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </footer>
 
+
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
+
 
 <script>
 
@@ -779,11 +850,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </script>
 
+
 </body>
 
 </html>
 
 <?php
+
 $conn->close();
+
 ?>
 
