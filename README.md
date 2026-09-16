@@ -52,7 +52,7 @@ The main objectives of the system are to:
 * Edit registration information.
 * Delete registration records.
 
----
+
 
 ## Technologies Used
 
@@ -132,7 +132,7 @@ Open a web browser and visit:
 http://localhost/Student%20Event%20Registration%20System/
 ```
 
----
+
 
 ## Registration Process
 
@@ -194,7 +194,7 @@ The system provides search functionality to make it easier to find information.
 
 Students can search available events, while authorised users can search submitted registration records from the administration section.
 
----
+
 
 ## Project Structure
 
