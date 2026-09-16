@@ -1,11 +1,11 @@
-
 <?php
-require_once "config/db.php";
 
+require_once "config/db.php";
 
 $selected_event = $_GET['event'] ?? '';
 
 $defaultEvents = [
+
     "New Students Orientation",
     "Academic & Study Skills Seminar",
     "Clinical Skills Competition",
@@ -18,14 +18,19 @@ $defaultEvents = [
     "Career & Professional Development Day",
     "Science & Research Exhibition",
     "Student Awards & Closing Ceremony"
+
 ];
 
 $events = [];
 
 foreach ($defaultEvents as $eventName) {
+
     $events[] = [
+
         "session_title" => $eventName
+
     ];
+
 }
 
 $sql = "SELECT session_title, session_date, status
@@ -37,21 +42,31 @@ $sql = "SELECT session_title, session_date, status
 $result = $conn->query($sql);
 
 if ($result) {
+
     while ($row = $result->fetch_assoc()) {
 
         $exists = false;
 
         foreach ($events as $event) {
+
             if ($event["session_title"] === $row["session_title"]) {
+
                 $exists = true;
+
                 break;
+
             }
+
         }
 
         if (!$exists) {
+
             $events[] = $row;
+
         }
+
     }
+
 }
 
 if ($selected_event !== '') {
@@ -59,15 +74,23 @@ if ($selected_event !== '') {
     $valid_event = false;
 
     foreach ($events as $event) {
+
         if ($selected_event === $event["session_title"]) {
+
             $valid_event = true;
+
             break;
+
         }
+
     }
 
     if (!$valid_event) {
+
         $selected_event = '';
+
     }
+
 }
 
 ?>
@@ -79,7 +102,10 @@ if ($selected_event !== '') {
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Register for Event | MMTC</title>
 
@@ -91,66 +117,171 @@ if ($selected_event !== '') {
     <style>
 
         body {
+
             margin: 0;
             font-family: Arial, sans-serif;
             background: #f4f7fb;
             color: #1f2937;
+
         }
 
+        /* =========================
+           NAVBAR
+        ========================= */
+
+        .navbar {
+
+            background: #123b68;
+            padding: 15px 0;
+
+        }
+
+        .navbar-brand {
+
+            color: white !important;
+            font-weight: 700;
+            font-size: 22px;
+            text-decoration: none;
+
+        }
+
+        .brand-wrapper {
+
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+
+        }
+
+        .navbar-logo {
+
+            height: 58px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+
+        }
+
+        .brand-name {
+
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.2;
+
+        }
+
+        .brand-name strong {
+
+            display: block;
+            color: white !important;
+            font-size: 22px;
+            font-weight: 800;
+
+        }
+
+        .brand-name span {
+
+            display: block;
+            color: #c8d9ea !important;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 3px;
+
+        }
+
+        .navbar-nav .nav-link {
+
+            color: #eaf2f8 !important;
+            margin-left: 12px;
+            font-weight: 500;
+
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+
+            color: white !important;
+
+        }
+
+        /* =========================
+           REGISTRATION SECTION
+        ========================= */
+
         .registration-section {
+
             min-height: 100vh;
             padding: 70px 20px;
+
         }
 
         .registration-card {
+
             max-width: 850px;
             margin: auto;
             background: white;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+
         }
 
         .registration-header {
+
             background: #123b68;
             color: white;
             padding: 35px;
             text-align: center;
+
         }
 
         .registration-header h1 {
+
             margin-bottom: 10px;
             font-weight: 700;
+
         }
 
         .registration-header p {
+
             margin: 0;
             opacity: 0.9;
+
         }
 
         .registration-body {
+
             padding: 40px;
+
         }
 
         .form-label {
+
             font-weight: 600;
             color: #26374a;
+
         }
 
         .form-control,
         .form-select {
+
             padding: 12px 14px;
             border-radius: 10px;
             border: 1px solid #d5dce5;
+
         }
 
         .form-control:focus,
         .form-select:focus {
+
             border-color: #1c79c9;
             box-shadow: 0 0 0 0.2rem rgba(28, 121, 201, 0.15);
+
         }
 
         .register-btn {
+
             width: 100%;
             border: none;
             background: #1c79c9;
@@ -160,57 +291,104 @@ if ($selected_event !== '') {
             font-size: 16px;
             font-weight: 600;
             transition: 0.3s;
+
         }
 
         .register-btn:hover {
+
             background: #145f9f;
+
         }
 
         .form-note {
+
             background: #eef6ff;
             border-left: 4px solid #1c79c9;
             padding: 14px;
             border-radius: 8px;
             margin-bottom: 25px;
             color: #31516e;
+
         }
 
         #messageBox {
+
             margin-bottom: 20px;
+
         }
 
         .alert {
+
             border-radius: 10px;
+
         }
 
+        /* =========================
+           MODAL
+        ========================= */
+
         .modal-header {
+
             background: #123b68;
             color: white;
+
         }
 
         .modal-header .btn-close {
+
             filter: brightness(0) invert(1);
+
         }
 
         .confirmation-details {
+
             background: #f5f8fc;
             padding: 18px;
             border-radius: 10px;
             line-height: 1.9;
+
         }
+
+        /* =========================
+           MOBILE
+        ========================= */
 
         @media (max-width: 576px) {
 
             .registration-section {
+
                 padding: 30px 12px;
+
             }
 
             .registration-body {
+
                 padding: 25px 18px;
+
             }
 
             .registration-header {
+
                 padding: 28px 20px;
+
+            }
+
+            .navbar-logo {
+
+                height: 50px;
+
+            }
+
+            .brand-name strong {
+
+                font-size: 19px;
+
+            }
+
+            .brand-name span {
+
+                font-size: 10px;
+
             }
 
         }
@@ -221,13 +399,143 @@ if ($selected_event !== '') {
 
 <body>
 
+
+<!-- =========================
+     NAVBAR
+========================= -->
+
+<nav class="navbar navbar-expand-lg">
+
+    <div class="container">
+
+        <a
+            class="navbar-brand brand-wrapper"
+            href="index.php"
+        >
+
+            <img
+                src="images/logo Image .png"
+                alt="MMTC Logo"
+                class="navbar-logo"
+            >
+
+            <div class="brand-name">
+
+                <strong>MMTC</strong>
+
+                <span>
+                    Student Event Registration System
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <button
+            class="navbar-toggler bg-light"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+        >
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+
+        <div
+            class="collapse navbar-collapse"
+            id="mainNavbar"
+        >
+
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="index.php"
+                    >
+                        Home
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="events.php"
+                    >
+                        Events
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="about.php"
+                    >
+                        About
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="contact.php"
+                    >
+                        Contact
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item ms-lg-2">
+
+                    <a
+                        class="btn btn-light px-3"
+                        href="register.php"
+                    >
+                        Register Now
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- =========================
+     REGISTRATION SECTION
+========================= -->
+
 <section class="registration-section">
 
     <div class="registration-card">
 
+
         <div class="registration-header">
 
-            <h1>Event Registration</h1>
+            <h1>
+                Event Registration
+            </h1>
 
             <p>
                 Macmillan Medical Training College - MMTC
@@ -235,17 +543,21 @@ if ($selected_event !== '') {
 
         </div>
 
+
         <div class="registration-body">
 
             <div id="messageBox"></div>
 
+
             <div class="form-note">
 
                 <strong>Important:</strong>
+
                 Please provide accurate information when registering
                 for a college event.
 
             </div>
+
 
             <form
                 id="registrationForm"
@@ -254,6 +566,7 @@ if ($selected_event !== '') {
             >
 
                 <div class="row g-4">
+
 
                     <div class="col-md-6">
 
@@ -355,7 +668,9 @@ if ($selected_event !== '') {
                             required
                         >
 
-                            <option value="">Select your course</option>
+                            <option value="">
+                                Select your course
+                            </option>
 
                             <option value="Diploma in Nursing">
                                 Diploma in Nursing
@@ -415,12 +730,18 @@ if ($selected_event !== '') {
                                 <option
                                     value="<?php echo htmlspecialchars($event['session_title']); ?>"
                                     <?php
+
                                     if ($selected_event === $event['session_title']) {
+
                                         echo "selected";
+
                                     }
+
                                     ?>
                                 >
+
                                     <?php echo htmlspecialchars($event['session_title']); ?>
+
                                 </option>
 
                             <?php endforeach; ?>
@@ -453,7 +774,9 @@ if ($selected_event !== '') {
 </section>
 
 
-<!-- CONFIRMATION MODAL -->
+<!-- =========================
+     CONFIRMATION MODAL
+========================= -->
 
 <div
     class="modal fade"
@@ -466,6 +789,7 @@ if ($selected_event !== '') {
     <div class="modal-dialog modal-dialog-centered">
 
         <div class="modal-content">
+
 
             <div class="modal-header">
 
@@ -491,19 +815,23 @@ if ($selected_event !== '') {
                     Please confirm that the information below is correct:
                 </p>
 
+
                 <div class="confirmation-details">
 
                     <strong>Student:</strong>
+
                     <span id="confirmStudent"></span>
 
                     <br>
 
                     <strong>Admission No:</strong>
+
                     <span id="confirmAdmission"></span>
 
                     <br>
 
                     <strong>Event:</strong>
+
                     <span id="confirmEvent"></span>
 
                 </div>
@@ -520,6 +848,7 @@ if ($selected_event !== '') {
                 >
                     Go Back
                 </button>
+
 
                 <button
                     type="button"
@@ -547,7 +876,8 @@ if ($selected_event !== '') {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const form = document.getElementById("registrationForm");
+    const form =
+        document.getElementById("registrationForm");
 
     const registerButton =
         document.getElementById("registerButton");
@@ -562,6 +892,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function showError(title, message) {
 
         messageBox.innerHTML = `
+
             <div
                 class="alert alert-danger alert-dismissible fade show"
                 role="alert"
@@ -578,12 +909,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 ></button>
 
             </div>
+
         `;
 
         window.scrollTo({
+
             top: 0,
             behavior: "smooth"
+
         });
+
     }
 
 
@@ -626,6 +961,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             return;
+
         }
 
 
@@ -637,6 +973,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             return;
+
         }
 
 
@@ -652,6 +989,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             return;
+
         }
 
 
@@ -667,6 +1005,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             return;
+
         }
 
 
@@ -703,12 +1042,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 
+
 </body>
 
 </html>
-
-
-
-
-
-
