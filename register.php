@@ -1,3 +1,4 @@
+```php
 <?php
 
 require_once "config/db.php";
@@ -922,6 +923,40 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    const fields = [
+
+        "student_name",
+        "admission_number",
+        "email",
+        "phone",
+        "course",
+        "event_name"
+
+    ];
+
+
+    fields.forEach(function (fieldId) {
+
+        const field =
+            document.getElementById(fieldId);
+
+
+        field.addEventListener("input", function () {
+
+            this.classList.remove("is-invalid");
+
+        });
+
+
+        field.addEventListener("change", function () {
+
+            this.classList.remove("is-invalid");
+
+        });
+
+    });
+
+
     registerButton.addEventListener("click", function () {
 
         const studentName =
@@ -946,19 +981,129 @@ document.addEventListener("DOMContentLoaded", function () {
         messageBox.innerHTML = "";
 
 
-        if (
-            studentName === "" ||
-            admissionNumber === "" ||
-            email === "" ||
-            phone === "" ||
-            course === "" ||
-            eventName === ""
-        ) {
+        fields.forEach(function (fieldId) {
+
+            document
+                .getElementById(fieldId)
+                .classList.remove("is-invalid");
+
+        });
+
+
+        if (studentName === "") {
 
             showError(
                 "Registration Error!",
-                "Please fill in all required fields."
+                "Please enter your student name."
             );
+
+            document
+                .getElementById("student_name")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("student_name")
+                .focus();
+
+            return;
+
+        }
+
+
+        if (admissionNumber === "") {
+
+            showError(
+                "Registration Error!",
+                "Please enter your admission number."
+            );
+
+            document
+                .getElementById("admission_number")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("admission_number")
+                .focus();
+
+            return;
+
+        }
+
+
+        if (email === "") {
+
+            showError(
+                "Registration Error!",
+                "Please enter your email address."
+            );
+
+            document
+                .getElementById("email")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("email")
+                .focus();
+
+            return;
+
+        }
+
+
+        if (phone === "") {
+
+            showError(
+                "Registration Error!",
+                "Please enter your phone number."
+            );
+
+            document
+                .getElementById("phone")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("phone")
+                .focus();
+
+            return;
+
+        }
+
+
+        if (course === "") {
+
+            showError(
+                "Registration Error!",
+                "Please select your course."
+            );
+
+            document
+                .getElementById("course")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("course")
+                .focus();
+
+            return;
+
+        }
+
+
+        if (eventName === "") {
+
+            showError(
+                "Registration Error!",
+                "Please select an event."
+            );
+
+            document
+                .getElementById("event_name")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("event_name")
+                .focus();
 
             return;
 
@@ -971,6 +1116,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Invalid Student Name!",
                 "Student name must contain at least 3 characters."
             );
+
+            document
+                .getElementById("student_name")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("student_name")
+                .focus();
 
             return;
 
@@ -988,6 +1141,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Please enter a valid email address."
             );
 
+            document
+                .getElementById("email")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("email")
+                .focus();
+
             return;
 
         }
@@ -1003,6 +1164,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Invalid Phone Number!",
                 "Please enter a valid phone number."
             );
+
+            document
+                .getElementById("phone")
+                .classList.add("is-invalid");
+
+            document
+                .getElementById("phone")
+                .focus();
 
             return;
 
@@ -1046,3 +1215,4 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 
 </html>
+```
