@@ -256,9 +256,3 @@ Possible future improvements include:
 **Project:** Student Event Registration Management System
 **Institution:** Macmillan Medical Training College (MMTC)
 **Year:** 2026
-
----
-
-## License
-
-This project was developed for educational and portfolio purposes.
