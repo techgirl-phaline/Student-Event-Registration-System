@@ -1,4 +1,3 @@
-```php
 <?php
 
 require_once "config/db.php";
@@ -96,9 +95,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: #263238;
         }
 
+        /* =========================
+           NAVBAR
+        ========================= */
+
         .navbar {
             background: #123b68;
             padding: 15px 0;
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 22px;
+            text-decoration: none;
+        }
+
+        .brand-wrapper {
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
         }
 
         .navbar-logo {
@@ -108,22 +124,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             display: block;
         }
 
-        .navbar-brand {
-            color: white !important;
-            font-weight: 700;
-            font-size: 22px;
-        }
-
-        .navbar-brand span {
-            display: block;
-            font-size: 11px;
-            font-weight: 400;
-            color: #c8d9ea;
-        }
-
         .brand-name {
             display: flex !important;
             flex-direction: column;
+            justify-content: center;
             line-height: 1.2;
         }
 
@@ -153,6 +157,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: white !important;
         }
 
+        /* =========================
+           HERO
+        ========================= */
+
         .hero {
             background: linear-gradient(
                 135deg,
@@ -177,6 +185,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             line-height: 1.7;
             color: #eaf4ff;
         }
+
+        /* =========================
+           CONTACT SECTION
+        ========================= */
 
         .section {
             padding: 70px 20px;
@@ -228,6 +240,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             line-height: 1.6;
         }
 
+        /* =========================
+           FORM
+        ========================= */
+
         .form-label {
             color: #123b68;
             font-weight: 600;
@@ -268,6 +284,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             border-radius: 10px;
         }
 
+        /* =========================
+           MAP
+        ========================= */
+
         .map-box {
             background: #eaf4ff;
             border-radius: 18px;
@@ -289,6 +309,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: #6c757d;
             margin-bottom: 0;
         }
+
+        /* =========================
+           CTA
+        ========================= */
 
         .cta {
             background: #123b68;
@@ -323,6 +347,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: #123b68;
         }
 
+        /* =========================
+           FOOTER
+        ========================= */
+
         .footer {
             background: #212529;
             color: white;
@@ -334,6 +362,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             margin: 0;
             color: #ced4da;
         }
+
+        /* =========================
+           MOBILE
+        ========================= */
 
         @media (max-width: 768px) {
 
@@ -353,6 +385,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 padding: 50px 20px;
             }
 
+            .brand-name strong {
+                font-size: 19px;
+            }
+
+            .brand-name span {
+                font-size: 10px;
+            }
+
+            .navbar-logo {
+                height: 50px;
+            }
+
         }
 
     </style>
@@ -361,12 +405,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <body>
 
+<!-- =========================
+     NAVBAR
+========================= -->
+
 <nav class="navbar navbar-expand-lg">
 
     <div class="container">
 
         <a
-            class="navbar-brand"
+            class="navbar-brand brand-wrapper"
             href="index.php"
         >
 
@@ -470,6 +518,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </nav>
 
 
+<!-- =========================
+     HERO
+========================= -->
+
 <section class="hero">
 
     <div class="container">
@@ -488,12 +540,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </section>
 
 
+<!-- =========================
+     CONTACT SECTION
+========================= -->
+
 <section class="section">
 
     <div class="container">
 
         <div class="row g-5">
-
 
             <div class="col-lg-5">
 
@@ -502,7 +557,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <h2>
                         Get In Touch
                     </h2>
-
 
                     <div class="contact-item">
 
@@ -602,7 +656,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         Send Us a Message
                     </h2>
 
-
                     <?php if ($message !== ""): ?>
 
                         <div class="alert alert-<?php echo $message_type; ?>">
@@ -621,7 +674,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     >
 
                         <div class="row g-3">
-
 
                             <div class="col-md-6">
 
@@ -769,6 +821,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </section>
 
 
+<!-- =========================
+     CTA
+========================= -->
+
 <section class="cta">
 
     <div class="container">
@@ -793,6 +849,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </section>
 
 
+<!-- =========================
+     FOOTER
+========================= -->
+
 <footer class="footer">
 
     <p>
@@ -808,10 +868,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </footer>
 
 
+<!-- =========================
+     BOOTSTRAP
+========================= -->
+
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
+
+<!-- =========================
+     FORM VALIDATION
+========================= -->
 
 <script>
 
@@ -855,9 +923,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </html>
 
+
 <?php
 
 $conn->close();
 
 ?>
-
