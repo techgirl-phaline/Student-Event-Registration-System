@@ -494,7 +494,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <div class="contact-item">
 
                         <div class="contact-icon">
-                            ✉️
+                            📩
                         </div>
 
                         <div>
