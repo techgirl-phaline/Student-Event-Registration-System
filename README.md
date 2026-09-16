@@ -81,7 +81,7 @@ To run the project locally, the following are required:
 * Web browser
 * Visual Studio Code or another code editor
 
----
+
 
 ## Installation and Setup
 
@@ -148,7 +148,7 @@ A student can register for an event through the following process:
 8. Valid information is stored in the MySQL database.
 9. The student receives registration feedback.
 
----
+
 
 ## Administration
 
@@ -175,7 +175,7 @@ The registration records include:
 * Event
 * Registration Date
 
----
+
 
 ## Responsive Design
 
@@ -186,7 +186,7 @@ The system uses **Bootstrap 5** together with custom CSS to provide a responsive
 * Tablets
 * Mobile devices
 
----
+
 
 ## Search Functionality
 
@@ -235,7 +235,7 @@ This project was developed as a web application development project to demonstra
 * CRUD operations
 * Git and GitHub version control
 
----
+
 
 ## Future Improvements
 
@@ -249,7 +249,7 @@ Possible future improvements include:
 * Registration statistics and charts.
 * Student notification system.
 
----
+
 
 ## Project Information
 
